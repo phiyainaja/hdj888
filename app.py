@@ -93,5 +93,5 @@ def get_stream():
 
 if __name__ == '__main__':
     # รองรับพอร์ตจาก Environment Variable ของ Render (หรือใช้ 10000 เป็นค่าเริ่มต้น)
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
