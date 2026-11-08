@@ -11,7 +11,7 @@ from playwright.async_api import async_playwright
 app = Flask(__name__)
 CORS(app)
 
-# 1. ฟังก์ชันหลักสำหรับดึงลิงก์วิดีโอผ่าน Playwright
+# 1. ฟังก์ชันหลักสำหรับดึงลิงก์วิดีโอผ่าน Playwright (ที่คุณเคยเขียนไว้)
 async def get_stream_url(detail_url, ep_num, log_func):
     base_play_url = detail_url.replace("/drama/detail/", "/play/detail/")
     target_url = f"{base_play_url}&ep={ep_num}"
@@ -19,10 +19,12 @@ async def get_stream_url(detail_url, ep_num, log_func):
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(
-            headless=True,  # ⚠️ สำคัญมาก: บน Render ต้องเป็น True เพราะเซิร์ฟเวอร์ไม่มีหน้าจอแสดงผล
+            headless=False,
             args=[
                 "--autoplay-policy=no-user-gesture-required",
                 "--mute-audio",
+                "--window-size=200,200",
+                "--window-position=-32000,-32000",
                 "--disable-gpu",
                 "--no-sandbox",
                 "--disable-dev-shm-usage"
@@ -73,8 +75,7 @@ async def get_stream_url(detail_url, ep_num, log_func):
 
         await browser.close()
     return video_url
-
-# 2. API Endpoint รองรับทั้ง 2 เส้นทาง
+# รองรับทั้ง 2 เส้นทางเพื่อป้องกันปัญหาเรียกผิด Endpoint
 @app.route('/api/get-stream', methods=['GET'])
 @app.route('/get-stream', methods=['GET'])
 def get_stream():
@@ -91,5 +92,6 @@ def get_stream():
     return jsonify({"video_url": None}), 404
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
+    # รองรับพอร์ตจาก Environment Variable ของ Render (หรือใช้ 10000 เป็นค่าเริ่มต้น)
+    port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
